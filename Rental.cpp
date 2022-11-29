@@ -84,6 +84,55 @@ class custom_moneypunct : public std::moneypunct<char>
 
 std::fstream fs;
 
+class mobil{
+public:
+    void menu(){
+        cout << "======MENU======\n";
+        cout << "1.input mobil\n";
+        cout << "2.hapus mobil\n";
+        cout << "3.tampilkan mobil\n";
+        cout << "4.tampilkan pendapatan\n";
+        cout << "5.keluar\n";
+        cout << "================\n";
+        cout << "pilih menu : ";
+    }
+    void menuMobil(){
+        cout << "masukkan ";
+    }
+    void tambahMobil(){
+        cout << "masukkan merek mobil : ";
+        cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        getline(cin, merek);
+
+        cout << "masukkan model mobil : ";
+        getline(cin, model);
+
+        cout << "masukkan plat nomor : ";
+        cin >> platNomor;
+        
+        cout << "masukkan harga sewa : ";
+        cin >> hargaSewa;
+    }
+    void tampilkanMobil(){
+        cout << "=================================\n";
+        cout << "merek\t\t: " << merek << "\n";
+        cout << "model\t\t: " << model << "\n";
+        cout << "plat nomor\t: " << platNomor << "\n";
+        cout << "hargaSewa\t: " << std::showbase << std::put_money(hargaSewa) << "\n";
+    }
+    string getPlat(){
+        return platNomor;
+    }
+
+private:
+    string merek;
+    string model;
+    string platNomor;
+    int hargaSewa;
+};
+
+mobil car;
+
 class pemilik{
 public:
     static pemilik& get_instance(){
@@ -112,6 +161,61 @@ public:
         return password;
     }
 
+    void saveMobil(){
+        char ch;
+        fs.open("mobil.dat", ios::app | ios::binary);
+
+        if(!fs.is_open()){
+            cout << "tidak dapat membuka file!";
+            pause();
+            return;
+
+        }else{
+            do{
+                system("CLS");
+                car.tambahMobil();
+
+                fs.write((char*)&car, sizeof(mobil));
+                cout << "tambahkan mobil lainnya?..(y/n?)";
+                cin >> ch;
+
+            }while(ch=='y'||ch=='Y');
+            fs.close();
+        }
+        
+    }
+
+    void hapusMobil(){
+        string nomorMobil;
+        system("CLS");
+
+        cout << "masukkan plat mobil yang ingin dihapus : ";
+        cin >> nomorMobil;
+
+        fs.open("mobil.dat", ios::in | ios::out);
+
+        std::fstream fs2;
+        fs2.open("temp.dat", ios::out);
+
+        fs.seekg(0, ios::beg);
+
+        while(fs.read((char*)&car, sizeof(mobil)))
+        {
+            if(car.getPlat() != nomorMobil){
+                fs2.write((char*)&car, sizeof(mobil));
+            }
+        }
+            
+        fs2.close();
+        fs.close();
+
+        remove("mobil.dat");
+        rename("temp.dat", "mobil.dat");
+
+        cout << "mobil dihapus";
+        pause();
+    }
+
 protected:
     pemilik() = default;
 
@@ -119,92 +223,6 @@ private:
     string username = "admin";
     string password = "admin";
 };
-
-class mobil{
-public:
-    // static mobil& get_instance(){
-    //     static mobil instance;
-    //     return instance;
-    // }
-
-    // mobil(const mobil&) = delete;
-    // mobil(mobil&&) = delete;
-    // mobil& operator = (const mobil&) = delete;
-    // mobil& operator = (mobil&&) = delete;
-
-    void menu(){
-        cout << "======MENU======\n";
-        cout << "1.input mobil\n";
-        cout << "2.hapus mobil\n";
-        cout << "3.tampilkan mobil\n";
-        cout << "4.tampilkan pendapatan\n";
-        cout << "5.keluar\n";
-        cout << "================\n";
-        cout << "pilih menu : ";
-    }
-    void menuMobil(){
-        cout << "masukkan ";
-    }
-    void tambahMobil(){
-        cout << "masukkan merek mobil : ";
-        cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-        //cin.getline(merek, 100);
-        getline(cin, merek);
-        cout << "masukkan model mobil : ";
-        //cin.getline(model, 100);
-        getline(cin, model);
-        cout << "masukkan plat nomor : ";
-        cin >> platNomor;
-        //cin.getline(platNomor, 100);
-        cout << "masukkan harga sewa : ";
-        cin >> hargaSewa;
-    }
-    void tampilkanMobil(){
-        cout << "=================================\n";
-        cout << "merek\t\t: " << merek << "\n";
-        cout << "model\t\t: " << model << "\n";
-        cout << "plat nomor\t: " << platNomor << "\n";
-        cout << "hargaSewa\t: " << std::showbase << std::put_money(hargaSewa) << "\n";
-    }
-    string getPlat(){
-        return platNomor;
-    }
-
-// protected:
-//     mobil() = default;
-
-private:
-    string merek;
-    string model;
-    string platNomor;
-    int hargaSewa;
-};
-
-mobil car;
-
-void saveMobil(){
-    char ch;
-    fs.open("mobil.dat", ios::app | ios::binary);
-
-    if(!fs.is_open()){
-        cout << "tidak dapat membuka file!";
-        pause();
-        return;
-
-    }else{
-        do{
-            system("CLS");
-            car.tambahMobil();
-
-            fs.write((char*)&car, sizeof(mobil));
-            cout << "tambahkan mobil lainnya?..(y/n?)";
-            cin >> ch;
-
-        }while(ch=='y'||ch=='Y');
-        fs.close();
-    }
-    
-}
 
 void displayMobil(){
     system("CLS");
@@ -224,38 +242,6 @@ void displayMobil(){
         fs.close();
         pause();
     }
-}
-
-
-void hapusMobil(){
-    string nomorMobil;
-    system("CLS");
-
-    cout << "masukkan plat mobil yang ingin dihapus : ";
-    cin >> nomorMobil;
-
-    fs.open("mobil.dat", ios::in | ios::out);
-
-    std::fstream fs2;
-    fs2.open("temp.dat", ios::out);
-
-    fs.seekg(0, ios::beg);
-
-    while(fs.read((char*)&car, sizeof(mobil)))
-    {
-        if(car.getPlat() != nomorMobil){
-            fs2.write((char*)&car, sizeof(mobil));
-        }
-    }
-        
-    fs2.close();
-    fs.close();
-
-    remove("mobil.dat");
-    rename("temp.dat", "mobil.dat");
-
-    cout << "mobil dihapus";
-    pause();
 }
 
 void loginCheck(){
@@ -296,8 +282,8 @@ int main(){
         cin >> pilihan;
 
         switch(pilihan){
-            case 1 : saveMobil(); break;
-            case 2 : hapusMobil(); break;
+            case 1 : pemilik::get_instance().saveMobil(); break;
+            case 2 : pemilik::get_instance().hapusMobil(); break;
             case 3 : displayMobil(); break;
             case 4 : break;
             case 5 : exit(1);
