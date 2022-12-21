@@ -264,7 +264,7 @@ void loginCheck(){
     fs.open("credential.dat", ios::in | ios::binary);
     fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
     
-    fs.close();
+    fs.close();nnnnnnn
     // encrypt("credential.dat", "ctmp.dat");
 
     if((pemilik::get_instance().getUsername() == username) && 
