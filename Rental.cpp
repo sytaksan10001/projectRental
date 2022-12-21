@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -6,6 +8,8 @@
 #include <locale>
 #include <iomanip>
 #include <conio.h>
+#include <windows.h>
+#include "encryption.h"
 
 using std::cout;
 using std::cin;
@@ -51,8 +55,7 @@ string hiddenChar(char sp = '*'){
     }
 }
 
-class custom_moneypunct : public std::moneypunct<char>
-{
+class custom_moneypunct : public std::moneypunct<char>{
     virtual char do_thousands_sep() const {
         return '.';
     }
@@ -86,19 +89,6 @@ std::fstream fs;
 
 class mobil{
 public:
-    void menu(){
-        cout << "======MENU======\n";
-        cout << "1.input mobil\n";
-        cout << "2.hapus mobil\n";
-        cout << "3.tampilkan mobil\n";
-        cout << "4.tampilkan pendapatan\n";
-        cout << "5.keluar\n";
-        cout << "================\n";
-        cout << "pilih menu : ";
-    }
-    void menuMobil(){
-        cout << "masukkan ";
-    }
     void tambahMobil(){
         cout << "masukkan merek mobil : ";
         cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
@@ -161,6 +151,19 @@ public:
         return password;
     }
 
+    void menu(){
+        cout << "======MENU======\n";
+        cout << "1. input mobil\n";
+        cout << "2. hapus mobil\n";
+        cout << "3. tampilkan mobil\n";
+        cout << "4. tampilkan pendapatan\n";
+        cout << "5. ubah username\n";
+        cout << "6. ubah password\n";
+        cout << "7. keluar\n";
+        cout << "================\n";
+        cout << "pilih menu : ";
+    }
+
     void saveMobil(){
         char ch;
         fs.open("mobil.dat", ios::app | ios::binary);
@@ -220,8 +223,10 @@ protected:
     pemilik() = default;
 
 private:
-    string username = "admin";
-    string password = "admin";
+    string username;
+    string password;
+    // string username = "admin";
+    // string password = "admin";
 };
 
 void displayMobil(){
@@ -254,31 +259,37 @@ void loginCheck(){
     cout << "masukkan password : ";
     password = hiddenChar();
 
+    // decrypt("credential.dat", "ctmp.dat");
+    fs.open("credential.dat", ios::in | ios::binary);
+    fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
+    
+    fs.close();
+    // encrypt("credential.dat", "ctmp.dat");
+
     if((pemilik::get_instance().getUsername() == username) && 
     (pemilik::get_instance().getPassword() == password)){
-
+        
         return;
 
     }else{
         system("CLS");
         cout << "password atau username salah!!";
+        cout << "\nuser : "<< pemilik::get_instance().getUsername();
+        cout << "\npass : "<< pemilik::get_instance().getPassword();
 
         pause();
         exit(1);
     } 
 }
 
-int main(){
+void runtimePemilik(){
     int pilihan;
-
-    locale loc(locale::classic(), new custom_moneypunct());
-    cout.imbue(loc);
 
     loginCheck();
 
     while(1){
         system("CLS");
-        car.menu();
+        pemilik::get_instance().menu();
         cin >> pilihan;
 
         switch(pilihan){
@@ -287,7 +298,73 @@ int main(){
             case 3 : displayMobil(); break;
             case 4 : break;
             case 5 : exit(1);
+            case 7 : exit(1);
+            default : cout << "\npilihan salah !!"; Sleep(2000);
         }
     }
+}
+
+
+void runtimePengguna(){
+    while(1){
+        exit(1);
+    }
+}
+
+int main(){
+    locale loc(locale::classic(), new custom_moneypunct());
+    cout.imbue(loc);
+
+    int login;
+    string temp;
+
+    system("CLS");
+
+
+    cout << "=====program rental mobil=====";
+    cout << "\n1. owner";
+    cout << "\n2. user";
+    cout << "\nlogin sebagai ? : ";
+    cin >> login;
+    
+    if(login == 1){
+        runtimePemilik();
+    }else if(login == 2){
+        runtimePengguna();
+    }else{
+        system("CLS");
+        cout << "\npilihan salah !!";
+        cout << "\nprogram keluar";
+        Sleep(2000);
+        exit(1);
+    }
+
+    
+    
+    // fs.open("credential.dat", ios::out | ios::binary);
+    // cout << "masukkan username : ";
+    // getline(cin, temp);
+    // pemilik::get_instance().setUsername(temp);
+
+    // cout << "masukkan password : ";
+    // getline(cin, temp);
+    // pemilik::get_instance().setPassword(temp);
+
+    // fs.write((char*)&pemilik::get_instance(), sizeof(pemilik));
+    // fs.close();
+
+    // pemilik::get_instance().setUsername("");
+    // pemilik::get_instance().setPassword("");
+
+    // encrypt("credential.dat", "ctmp.dat");
+    // // decrypt("credential.dat", "ctmp.dat");
+
+    // fs.open("credential.dat", ios::in | ios::binary);
+    // fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
+
+    // // cout << "\nusername adalah = " << pemilik::get_instance().getUsername();
+    // // cout << "\npassword adalah = " << pemilik::get_instance().getPassword();
+    // fs.close();
+
     return 0;
 }
