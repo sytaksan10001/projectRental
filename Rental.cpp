@@ -260,6 +260,7 @@ void loginCheck(){
     password = hiddenChar();
 
     // decrypt("credential.dat", "ctmp.dat");
+    //! Err here
     fs.open("credential.dat", ios::in | ios::binary);
     fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
     
