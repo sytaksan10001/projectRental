@@ -336,12 +336,8 @@ int main(){
     //     Sleep(2000);
     //     exit(1);
     // }
-
     
-    // encrypt("credential.dat");
-    // decrypt("credential.dat");
-    
-    std::ofstream fs("credential.dat", std::ios::out | std::ios::binary);
+    fs.open("credential.dat", std::ios::out | std::ios::binary);
     std::cout << "masukkan username : ";
     std::getline(std::cin, temp);
     owner.setUsername(temp);
@@ -356,15 +352,18 @@ int main(){
     }
     fs.close();
 
+    encrypt("credential.dat");
+    decrypt("credential.dat");
+
     owner.setUsername("");
     owner.setPassword("");
 
-    std::ifstream fs2("credential.dat", std::ios::in | std::ios::binary);
+    fs.open("credential.dat", std::ios::in | std::ios::binary);
     {
-        cereal::BinaryInputArchive iar(fs2);
+        cereal::BinaryInputArchive iar(fs);
         iar(owner);
     }
-    fs2.close();
+    fs.close();
 
     std::cout << "\nusername adalah = " << owner.getUsername();
     std::cout << "\npassword adalah = " << owner.getPassword();
