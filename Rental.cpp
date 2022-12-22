@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <conio.h>
 #include <windows.h>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
 #include "encryption.h"
 
 using std::cout;
@@ -210,6 +212,12 @@ public:
     }
 
 private:
+    friend class cereal::access;
+
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(username, password);
+    }
     string username;
     string password;
     // string username = "admin";
@@ -311,50 +319,55 @@ int main(){
     system("CLS");
 
 
-    cout << "=====program rental mobil=====";
-    cout << "\n1. owner";
-    cout << "\n2. user";
-    cout << "\nlogin sebagai ? : ";
-    cin >> login;
+    // cout << "=====program rental mobil=====";
+    // cout << "\n1. owner";
+    // cout << "\n2. user";
+    // cout << "\nlogin sebagai ? : ";
+    // cin >> login;
     
-    if(login == 1){
-        runtimePemilik();
-    }else if(login == 2){
-        runtimePengguna();
-    }else{
-        system("CLS");
-        cout << "\npilihan salah !!";
-        cout << "\nprogram keluar";
-        Sleep(2000);
-        exit(1);
+    // if(login == 1){
+    //     runtimePemilik();
+    // }else if(login == 2){
+    //     runtimePengguna();
+    // }else{
+    //     system("CLS");
+    //     cout << "\npilihan salah !!";
+    //     cout << "\nprogram keluar";
+    //     Sleep(2000);
+    //     exit(1);
+    // }
+
+    
+    // encrypt("credential.dat");
+    // decrypt("credential.dat");
+    
+    std::ofstream fs("credential.dat", std::ios::out | std::ios::binary);
+    std::cout << "masukkan username : ";
+    std::getline(std::cin, temp);
+    owner.setUsername(temp);
+
+    std::cout << "masukkan password : ";
+    std::getline(std::cin, temp);
+    owner.setPassword(temp);
+
+    {
+        cereal::BinaryOutputArchive oar(fs);
+        oar(owner);
     }
+    fs.close();
 
-    
-    
-    // fs.open("credential.dat", ios::out | ios::binary);
-    // cout << "masukkan username : ";
-    // getline(cin, temp);
-    // owner.setUsername(temp);
+    owner.setUsername("");
+    owner.setPassword("");
 
-    // cout << "masukkan password : ";
-    // getline(cin, temp);
-    // owner.setPassword(temp);
+    std::ifstream fs2("credential.dat", std::ios::in | std::ios::binary);
+    {
+        cereal::BinaryInputArchive iar(fs2);
+        iar(owner);
+    }
+    fs2.close();
 
-    // fs.write((char*)&owner, sizeof(pemilik));
-    // fs.close();
-
-    // owner.setUsername("");
-    // owner.setPassword("");
-
-    // encrypt("credential.dat", "ctmp.dat");
-    // decrypt("credential.dat", "ctmp.dat");
-
-    // fs.open("credential.dat", ios::in | ios::binary);
-    // fs.read((char*)&owner, sizeof(pemilik));
-
-    // cout << "\nusername adalah = " << owner.getUsername();
-    // cout << "\npassword adalah = " << owner.getPassword();
-    // fs.close();
+    std::cout << "\nusername adalah = " << owner.getUsername();
+    std::cout << "\npassword adalah = " << owner.getPassword();
 
     return 0;
 }
