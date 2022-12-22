@@ -1,80 +1,52 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <Windows.h>
+//#include <Windows.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
 
-void encrypt(std::string fileName, std::string temp){
-    char ch;
-    std::fstream fps, fpt;
-    
-    fps.open(fileName, std::fstream::in);
-    if(!fps){
-        std::cout << "\nError : tidak dapat membuka file " << fileName << " !!";
-        Sleep(2000);
-        exit(1);
+void encrypt(std::string fileName){
+    std::fstream fs(fileName, std::ios::in | std::ios::out | std::ios::binary);
+    if(!fs.is_open()){
+        std::cerr << "Error opening file: " << fileName << std::endl;
+        return;
     }
 
-    fpt.open(temp, std::fstream::out);
-    if(!fpt){
-        std::cout << "\nError : tidak dapat membuka file tmp " << temp << " !!";
-        Sleep(2000);
-        exit(1);
-    }
+    // Use cereal to serialize the data in the file
+    cereal::BinaryInputArchive input(fs);
+    std::string data;
+    input(data);
 
-    while(fps >> std::noskipws >> ch){
-        ch = ch + 100;
-        fpt << ch;
-    }
+    // Encrypt the data
+    for(char &c : data) c += 100;
 
-    fps.close();
-    fpt.close();
+    // Use cereal to serialize the encrypted data back to the file
+    fs.seekp(0);
+    cereal::BinaryOutputArchive output(fs);
+    output(data);
 
-    fps.open(fileName, std::fstream::out);
-    if(!fps){
-        std::cout << "\nError : tidak dapat membuka file " << fileName << " !!";
-        Sleep(2000);
-        exit(1);
-    }
-
-    fpt.open(temp, std::fstream::in);
-    if(!fpt){
-        std::cout << "\nError : tidak dapat membuka file tmp " << temp << " !!";
-        Sleep(2000);
-        exit(1);
-    }
-
-    while(fpt >> std::noskipws >> ch){
-        fps << ch;
-    }
-    fps.close();
-    fpt.close();
+    fs.close();
 }
 
-void decrypt(std::string fileName, std::string temp){
-    char ch;
-    std::fstream fps, fpt;
-    
-    fps.open(fileName, std::fstream::out);
-    if(!fps){
-        std::cout << "\nError : tidak dapat membuka file " << fileName << " !!";
-        Sleep(2000);
-        exit(1);
+void decrypt(std::string fileName){
+    std::fstream fs(fileName, std::ios::in | std::ios::out | std::ios::binary);
+    if(!fs.is_open()){
+        std::cerr << "Error opening file: " << fileName << std::endl;
+        return;
     }
 
-    fpt.open(temp, std::fstream::in);
-    if(!fpt){
-        std::cout << "\nError : tidak dapat membuka file tmp " << temp << " !!";
-        Sleep(2000);
-        exit(1);
-    }
-    
-    while(fpt >> std::noskipws >> ch){
-        ch = ch - 100;
-        fps << ch;
-    }
+    // Use cereal to serialize the data in the file
+    cereal::BinaryInputArchive input(fs);
+    std::string data;
+    input(data);
 
-    fps.close();
-    fpt.close();
+    // Decrypt the data
+    for(char &c : data) c -= 100;
+
+    // Use cereal to serialize the decrypted data back to the file
+    fs.seekp(0);
+    cereal::BinaryOutputArchive output(fs);
+    output(data);
+
+    fs.close();
 }
