@@ -196,17 +196,26 @@ public:
         cout << "masukkan plat mobil yang ingin dihapus : ";
         cin >> nomorMobil;
 
-        fs.open("mobil.dat", ios::in | ios::out);
+        fs.open("mobil.dat", std::ios::in | std::ios::out | std::ios::binary);
 
         std::fstream fs2;
-        fs2.open("temp.dat", ios::out);
+        fs2.open("temp.dat", std::ios::out | std::ios::binary);
 
         fs.seekg(0, ios::beg);
 
-        while(fs.read((char*)&car, sizeof(mobil)))
-        {
+        cereal::BinaryInputArchive input(fs);
+
+        while(true){
+            try{
+                input(car);
+            }
+            catch (cereal::Exception &e){
+                break;
+            }
+
             if(car.getPlat() != nomorMobil){
-                fs2.write((char*)&car, sizeof(mobil));
+                cereal::BinaryOutputArchive output_archive(fs2);
+                output_archive(car);
             }
         }
             
@@ -218,6 +227,10 @@ public:
 
         cout << "mobil dihapus";
         pause();
+    }
+
+    void pendapatan(){
+
     }
 
 private:
@@ -312,7 +325,7 @@ void runtimePemilik(){
             case 1 : owner.saveMobil(); break;
             case 2 : owner.hapusMobil(); break;
             case 3 : displayMobil(); break;
-            case 4 : break;
+            case 4 : owner.pendapatan(); break;
             case 5 : exit(1);
             case 7 : exit(1);
             default : cout << "\npilihan salah !!"; Sleep(2000);
@@ -322,7 +335,9 @@ void runtimePemilik(){
 
 
 void runtimePengguna(){
+    int pilihan;
     while(1){
+        system("CLS");
         exit(1);
     }
 }
