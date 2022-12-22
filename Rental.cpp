@@ -117,6 +117,13 @@ public:
     }
 
 private:
+    friend class cereal::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar) {
+        ar(merek, model, platNomor, hargaSewa);
+    }
+    
     string merek;
     string model;
     string platNomor;
@@ -158,7 +165,7 @@ public:
 
     void saveMobil(){
         char ch;
-        fs.open("mobil.dat", ios::app | ios::binary);
+        std::ofstream fs("mobil.dat", std::ios::app | std::ios::binary);
 
         if(!fs.is_open()){
             cout << "tidak dapat membuka file!";
@@ -170,7 +177,9 @@ public:
                 system("CLS");
                 car.tambahMobil();
 
-                fs.write((char*)&car, sizeof(mobil));
+                cereal::BinaryOutputArchive oar(fs);
+                oar(car);
+
                 cout << "tambahkan mobil lainnya?..(y/n?)";
                 cin >> ch;
 
@@ -227,7 +236,8 @@ pemilik owner;
 
 void displayMobil(){
     system("CLS");
-    fs.open("mobil.dat", ios::in | ios::binary);
+    std::ifstream fs("mobil.dat", std::ios::binary);
+    cereal::BinaryInputArchive input(fs);
 
     if(!fs.is_open()){
         cout << "tidak dapat membuka file!";
@@ -235,11 +245,18 @@ void displayMobil(){
         return;
 
     }else{
-        while(fs.read((char*)&car, sizeof(mobil)))
+        while(true)
         {
-            car.tampilkanMobil();
+            try
+            {
+                input(car);
+                car.tampilkanMobil();
+            }
+            catch (cereal::Exception &e)
+            {
+                break;
+            }
         }
-
         fs.close();
         pause();
     }
@@ -262,7 +279,7 @@ void loginCheck(){
     input(owner);
     
     fs2.close();
-    // cout << "\n\nits here!";
+    
     encrypt("credential.dat");
 
     if((owner.getUsername() == username) && 
