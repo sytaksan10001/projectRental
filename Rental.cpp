@@ -247,6 +247,48 @@ private:
 
 pemilik owner;
 
+class pengguna{
+public:
+    void menu(){
+        cout << "=============MENU=============\n";
+        cout << "1. pilih mobil untuk dirental\n";
+        cout << "2. hapus mobil yang dirental\n";
+        cout << "3. list mobil yang dipilih\n";
+        cout << "4. check out\n";
+        cout << "5. keluar\n";
+        cout << "===============================\n";
+        cout << "Pilih menu : ";
+    }
+    void cariMobil(){
+
+    }
+    void addMobil(){
+        char ch;
+        std::ofstream fs("cart.dat", std::ios::app | std::ios::binary);
+        do{
+            system("CLS");
+            cariMobil();
+
+
+
+                // cereal::BinaryOutputArchive oar(fs);
+                // oar(car);
+
+                // cout << "tambahkan mobil lainnya?..(y/n?)";
+                // cin >> ch;
+
+            }while(ch=='y'||ch=='Y');
+            fs.close();
+        }
+
+    void delMobil(){
+        
+    }
+private:
+};
+
+pengguna user;
+
 void displayMobil(){
     system("CLS");
     std::ifstream fs("mobil.dat", std::ios::binary);
@@ -338,7 +380,17 @@ void runtimePengguna(){
     int pilihan;
     while(1){
         system("CLS");
-        exit(1);
+        user.menu();
+        
+        switch(pilihan){
+            case 1 : user.addMobil(); break;
+            case 2 : user.delMobil(); break;
+            case 3 : displayMobil(); break;
+            case 4 : owner.pendapatan(); break;
+            case 5 : exit(1);
+            case 7 : exit(1);
+            default : cout << "\npilihan salah !!"; Sleep(2000);
+        }
     }
 }
 
