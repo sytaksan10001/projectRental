@@ -334,26 +334,26 @@ int main(){
     // fs.open("credential.dat", ios::out | ios::binary);
     // cout << "masukkan username : ";
     // getline(cin, temp);
-    // pemilik::get_instance().setUsername(temp);
+    // owner.setUsername(temp);
 
     // cout << "masukkan password : ";
     // getline(cin, temp);
-    // pemilik::get_instance().setPassword(temp);
+    // owner.setPassword(temp);
 
-    // fs.write((char*)&pemilik::get_instance(), sizeof(pemilik));
+    // fs.write((char*)&owner, sizeof(pemilik));
     // fs.close();
 
-    // pemilik::get_instance().setUsername("");
-    // pemilik::get_instance().setPassword("");
+    // owner.setUsername("");
+    // owner.setPassword("");
 
     // encrypt("credential.dat", "ctmp.dat");
-    // // decrypt("credential.dat", "ctmp.dat");
+    // decrypt("credential.dat", "ctmp.dat");
 
     // fs.open("credential.dat", ios::in | ios::binary);
-    // fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
+    // fs.read((char*)&owner, sizeof(pemilik));
 
-    // // cout << "\nusername adalah = " << pemilik::get_instance().getUsername();
-    // // cout << "\npassword adalah = " << pemilik::get_instance().getPassword();
+    // cout << "\nusername adalah = " << owner.getUsername();
+    // cout << "\npassword adalah = " << owner.getPassword();
     // fs.close();
 
     return 0;
