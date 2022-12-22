@@ -218,10 +218,9 @@ private:
     void serialize(Archive &ar) {
         ar(username, password);
     }
+
     string username;
     string password;
-    // string username = "admin";
-    // string password = "admin";
 };
 
 pemilik owner;
@@ -256,13 +255,15 @@ void loginCheck(){
     cout << "masukkan password : ";
     password = hiddenChar();
 
-    // decrypt("credential.dat", "ctmp.dat");
-    //! Err here
-    fs.open("credential.dat", ios::in | ios::binary);
-    fs.read((char*)&owner, sizeof(pemilik));
+    decrypt("credential.dat");
+
+    std::ifstream fs2("credential.dat", ios::in | std::ios::binary);
+    cereal::BinaryInputArchive input(fs2);
+    input(owner);
     
-    fs.close();
-    // encrypt("credential.dat", "ctmp.dat");
+    fs2.close();
+    // cout << "\n\nits here!";
+    encrypt("credential.dat");
 
     if((owner.getUsername() == username) && 
     (owner.getPassword() == password)){
@@ -318,55 +319,57 @@ int main(){
 
     system("CLS");
 
-
-    // cout << "=====program rental mobil=====";
-    // cout << "\n1. owner";
-    // cout << "\n2. user";
-    // cout << "\nlogin sebagai ? : ";
-    // cin >> login;
+    cout << "=====program rental mobil=====";
+    cout << "\n1. owner";
+    cout << "\n2. user";
+    cout << "\nlogin sebagai ? : ";
+    cin >> login;
     
-    // if(login == 1){
-    //     runtimePemilik();
-    // }else if(login == 2){
-    //     runtimePengguna();
-    // }else{
-    //     system("CLS");
-    //     cout << "\npilihan salah !!";
-    //     cout << "\nprogram keluar";
-    //     Sleep(2000);
-    //     exit(1);
+    if(login == 1){
+        runtimePemilik();
+    }else if(login == 2){
+        runtimePengguna();
+    }else{
+        system("CLS");
+        cout << "\npilihan salah !!";
+        cout << "\nprogram keluar";
+        Sleep(2000);
+        exit(1);
+    }
+    
+
+
+
+    // fs.open("credential.dat", std::ios::out | std::ios::binary);
+    // std::cout << "masukkan username : ";
+    // std::getline(std::cin, temp);
+    // owner.setUsername(temp);
+
+    // std::cout << "masukkan password : ";
+    // std::getline(std::cin, temp);
+    // owner.setPassword(temp);
+
+    // {
+    //     cereal::BinaryOutputArchive oar(fs);
+    //     oar(owner);
     // }
-    
-    fs.open("credential.dat", std::ios::out | std::ios::binary);
-    std::cout << "masukkan username : ";
-    std::getline(std::cin, temp);
-    owner.setUsername(temp);
+    // fs.close();
 
-    std::cout << "masukkan password : ";
-    std::getline(std::cin, temp);
-    owner.setPassword(temp);
+    // encrypt("credential.dat");
+    // decrypt("credential.dat");
 
-    {
-        cereal::BinaryOutputArchive oar(fs);
-        oar(owner);
-    }
-    fs.close();
+    // owner.setUsername("");
+    // owner.setPassword("");
 
-    encrypt("credential.dat");
-    decrypt("credential.dat");
+    // fs.open("credential.dat", std::ios::in | std::ios::binary);
+    // {
+    //     cereal::BinaryInputArchive iar(fs);
+    //     iar(owner);
+    // }
+    // fs.close();
 
-    owner.setUsername("");
-    owner.setPassword("");
-
-    fs.open("credential.dat", std::ios::in | std::ios::binary);
-    {
-        cereal::BinaryInputArchive iar(fs);
-        iar(owner);
-    }
-    fs.close();
-
-    std::cout << "\nusername adalah = " << owner.getUsername();
-    std::cout << "\npassword adalah = " << owner.getPassword();
+    // std::cout << "\nusername adalah = " << owner.getUsername();
+    // std::cout << "\npassword adalah = " << owner.getPassword();
 
     return 0;
 }
