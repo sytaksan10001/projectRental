@@ -125,16 +125,6 @@ mobil car;
 
 class pemilik{
 public:
-    static pemilik& get_instance(){
-        static pemilik instance;
-        return instance;
-    }
-
-    pemilik(const pemilik&) = delete;
-    pemilik(pemilik&&) = delete;
-    pemilik& operator = (const pemilik&) = delete;
-    pemilik& operator = (pemilik&&) = delete;
-
     void setUsername(string username){
         pemilik::username = username;
     }
@@ -219,15 +209,14 @@ public:
         pause();
     }
 
-protected:
-    pemilik() = default;
-
 private:
     string username;
     string password;
     // string username = "admin";
     // string password = "admin";
 };
+
+pemilik owner;
 
 void displayMobil(){
     system("CLS");
@@ -262,21 +251,21 @@ void loginCheck(){
     // decrypt("credential.dat", "ctmp.dat");
     //! Err here
     fs.open("credential.dat", ios::in | ios::binary);
-    fs.read((char*)&pemilik::get_instance(), sizeof(pemilik));
+    fs.read((char*)&owner, sizeof(pemilik));
     
-    fs.close();nnnnnnn
+    fs.close();
     // encrypt("credential.dat", "ctmp.dat");
 
-    if((pemilik::get_instance().getUsername() == username) && 
-    (pemilik::get_instance().getPassword() == password)){
+    if((owner.getUsername() == username) && 
+    (owner.getPassword() == password)){
         
         return;
 
     }else{
         system("CLS");
         cout << "password atau username salah!!";
-        cout << "\nuser : "<< pemilik::get_instance().getUsername();
-        cout << "\npass : "<< pemilik::get_instance().getPassword();
+        cout << "\nuser : "<< owner.getUsername();
+        cout << "\npass : "<< owner.getPassword();
 
         pause();
         exit(1);
@@ -290,12 +279,12 @@ void runtimePemilik(){
 
     while(1){
         system("CLS");
-        pemilik::get_instance().menu();
+        owner.menu();
         cin >> pilihan;
 
         switch(pilihan){
-            case 1 : pemilik::get_instance().saveMobil(); break;
-            case 2 : pemilik::get_instance().hapusMobil(); break;
+            case 1 : owner.saveMobil(); break;
+            case 2 : owner.hapusMobil(); break;
             case 3 : displayMobil(); break;
             case 4 : break;
             case 5 : exit(1);
