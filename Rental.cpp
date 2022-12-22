@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -6,6 +8,10 @@
 #include <locale>
 #include <iomanip>
 #include <conio.h>
+#include <windows.h>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include "encryption.h"
 
 using std::cout;
 using std::cin;
@@ -51,8 +57,7 @@ string hiddenChar(char sp = '*'){
     }
 }
 
-class custom_moneypunct : public std::moneypunct<char>
-{
+class custom_moneypunct : public std::moneypunct<char>{
     virtual char do_thousands_sep() const {
         return '.';
     }
@@ -86,19 +91,6 @@ std::fstream fs;
 
 class mobil{
 public:
-    void menu(){
-        cout << "======MENU======\n";
-        cout << "1.input mobil\n";
-        cout << "2.hapus mobil\n";
-        cout << "3.tampilkan mobil\n";
-        cout << "4.tampilkan pendapatan\n";
-        cout << "5.keluar\n";
-        cout << "================\n";
-        cout << "pilih menu : ";
-    }
-    void menuMobil(){
-        cout << "masukkan ";
-    }
     void tambahMobil(){
         cout << "masukkan merek mobil : ";
         cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
@@ -125,6 +117,13 @@ public:
     }
 
 private:
+    friend class cereal::access;
+
+    template <typename Archive>
+    void serialize(Archive &ar) {
+        ar(merek, model, platNomor, hargaSewa);
+    }
+    
     string merek;
     string model;
     string platNomor;
@@ -135,16 +134,6 @@ mobil car;
 
 class pemilik{
 public:
-    static pemilik& get_instance(){
-        static pemilik instance;
-        return instance;
-    }
-
-    pemilik(const pemilik&) = delete;
-    pemilik(pemilik&&) = delete;
-    pemilik& operator = (const pemilik&) = delete;
-    pemilik& operator = (pemilik&&) = delete;
-
     void setUsername(string username){
         pemilik::username = username;
     }
@@ -161,9 +150,22 @@ public:
         return password;
     }
 
+    void menu(){
+        cout << "======MENU======\n";
+        cout << "1. input mobil\n";
+        cout << "2. hapus mobil\n";
+        cout << "3. tampilkan mobil\n";
+        cout << "4. tampilkan pendapatan\n";
+        cout << "5. ubah username\n";
+        cout << "6. ubah password\n";
+        cout << "7. keluar\n";
+        cout << "================\n";
+        cout << "pilih menu : ";
+    }
+
     void saveMobil(){
         char ch;
-        fs.open("mobil.dat", ios::app | ios::binary);
+        std::ofstream fs("mobil.dat", std::ios::app | std::ios::binary);
 
         if(!fs.is_open()){
             cout << "tidak dapat membuka file!";
@@ -175,7 +177,9 @@ public:
                 system("CLS");
                 car.tambahMobil();
 
-                fs.write((char*)&car, sizeof(mobil));
+                cereal::BinaryOutputArchive oar(fs);
+                oar(car);
+
                 cout << "tambahkan mobil lainnya?..(y/n?)";
                 cin >> ch;
 
@@ -192,17 +196,26 @@ public:
         cout << "masukkan plat mobil yang ingin dihapus : ";
         cin >> nomorMobil;
 
-        fs.open("mobil.dat", ios::in | ios::out);
+        fs.open("mobil.dat", std::ios::in | std::ios::out | std::ios::binary);
 
         std::fstream fs2;
-        fs2.open("temp.dat", ios::out);
+        fs2.open("temp.dat", std::ios::out | std::ios::binary);
 
         fs.seekg(0, ios::beg);
 
-        while(fs.read((char*)&car, sizeof(mobil)))
-        {
+        cereal::BinaryInputArchive input(fs);
+
+        while(true){
+            try{
+                input(car);
+            }
+            catch (cereal::Exception &e){
+                break;
+            }
+
             if(car.getPlat() != nomorMobil){
-                fs2.write((char*)&car, sizeof(mobil));
+                cereal::BinaryOutputArchive output_archive(fs2);
+                output_archive(car);
             }
         }
             
@@ -216,17 +229,28 @@ public:
         pause();
     }
 
-protected:
-    pemilik() = default;
+    void pendapatan(){
+
+    }
 
 private:
-    string username = "admin";
-    string password = "admin";
+    friend class cereal::access;
+
+    template<class Archive>
+    void serialize(Archive &ar) {
+        ar(username, password);
+    }
+
+    string username;
+    string password;
 };
+
+pemilik owner;
 
 void displayMobil(){
     system("CLS");
-    fs.open("mobil.dat", ios::in | ios::binary);
+    std::ifstream fs("mobil.dat", std::ios::binary);
+    cereal::BinaryInputArchive input(fs);
 
     if(!fs.is_open()){
         cout << "tidak dapat membuka file!";
@@ -234,11 +258,18 @@ void displayMobil(){
         return;
 
     }else{
-        while(fs.read((char*)&car, sizeof(mobil)))
+        while(true)
         {
-            car.tampilkanMobil();
+            try
+            {
+                input(car);
+                car.tampilkanMobil();
+            }
+            catch (cereal::Exception &e)
+            {
+                break;
+            }
         }
-
         fs.close();
         pause();
     }
@@ -254,40 +285,123 @@ void loginCheck(){
     cout << "masukkan password : ";
     password = hiddenChar();
 
-    if((pemilik::get_instance().getUsername() == username) && 
-    (pemilik::get_instance().getPassword() == password)){
+    decrypt("credential.dat");
 
+    std::ifstream fs2("credential.dat", ios::in | std::ios::binary);
+    cereal::BinaryInputArchive input(fs2);
+    input(owner);
+    
+    fs2.close();
+    
+    encrypt("credential.dat");
+
+    if((owner.getUsername() == username) && 
+    (owner.getPassword() == password)){
+        
         return;
 
     }else{
         system("CLS");
         cout << "password atau username salah!!";
+        cout << "\nuser : "<< owner.getUsername();
+        cout << "\npass : "<< owner.getPassword();
 
         pause();
         exit(1);
     } 
 }
 
-int main(){
+void runtimePemilik(){
     int pilihan;
-
-    locale loc(locale::classic(), new custom_moneypunct());
-    cout.imbue(loc);
 
     loginCheck();
 
     while(1){
         system("CLS");
-        car.menu();
+        owner.menu();
         cin >> pilihan;
 
         switch(pilihan){
-            case 1 : pemilik::get_instance().saveMobil(); break;
-            case 2 : pemilik::get_instance().hapusMobil(); break;
+            case 1 : owner.saveMobil(); break;
+            case 2 : owner.hapusMobil(); break;
             case 3 : displayMobil(); break;
-            case 4 : break;
+            case 4 : owner.pendapatan(); break;
             case 5 : exit(1);
+            case 7 : exit(1);
+            default : cout << "\npilihan salah !!"; Sleep(2000);
         }
     }
+}
+
+
+void runtimePengguna(){
+    int pilihan;
+    while(1){
+        system("CLS");
+        exit(1);
+    }
+}
+
+int main(){
+    locale loc(locale::classic(), new custom_moneypunct());
+    cout.imbue(loc);
+
+    int login;
+    string temp;
+
+    system("CLS");
+
+    cout << "=====program rental mobil=====";
+    cout << "\n1. owner";
+    cout << "\n2. user";
+    cout << "\nlogin sebagai ? : ";
+    cin >> login;
+    
+    if(login == 1){
+        runtimePemilik();
+    }else if(login == 2){
+        runtimePengguna();
+    }else{
+        system("CLS");
+        cout << "\npilihan salah !!";
+        cout << "\nprogram keluar";
+        Sleep(2000);
+        exit(1);
+    }
+    
+
+
+
+    // fs.open("credential.dat", std::ios::out | std::ios::binary);
+    // std::cout << "masukkan username : ";
+    // std::getline(std::cin, temp);
+    // owner.setUsername(temp);
+
+    // std::cout << "masukkan password : ";
+    // std::getline(std::cin, temp);
+    // owner.setPassword(temp);
+
+    // {
+    //     cereal::BinaryOutputArchive oar(fs);
+    //     oar(owner);
+    // }
+    // fs.close();
+
+    // encrypt("credential.dat");
+    // decrypt("credential.dat");
+
+    // owner.setUsername("");
+    // owner.setPassword("");
+
+    // fs.open("credential.dat", std::ios::in | std::ios::binary);
+    // {
+    //     cereal::BinaryInputArchive iar(fs);
+    //     iar(owner);
+    // }
+    // fs.close();
+
+    // std::cout << "\nusername adalah = " << owner.getUsername();
+    // std::cout << "\npassword adalah = " << owner.getPassword();
+
     return 0;
 }
