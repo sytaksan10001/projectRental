@@ -191,8 +191,13 @@ public:
     string getPassword(){
         return password;
     }
+
     void pemasukan(int pemasukan){
         pendapatan += pemasukan;
+    }
+
+    void resetPendapatanP(){
+        pendapatan = 0;
     }
 
     void menu(){
@@ -202,7 +207,8 @@ public:
         cout << "3. tampilkan mobil\n";
         cout << "4. tampilkan pendapatan\n";
         cout << "5. ubah username/password\n";
-        cout << "6. keluar\n";
+        cout << "6. reset pendapatan\n";
+        cout << "7. keluar\n";
         cout << "================\n";
         cout << "pilih menu : ";
     }
@@ -328,7 +334,26 @@ void changeCredential(){
         std::cout << "\npassword adalah = " << owner.getPassword();
         
         encrypt("credential.dat");   
-    }
+}
+
+void resetPendapatan(){
+    decrypt("credential.dat");
+
+    std::ifstream fs2("credential.dat", ios::in | std::ios::binary);
+    cereal::BinaryInputArchive input(fs2);
+            
+    input(owner);
+    owner.resetPendapatanP();
+    fs2.close();
+
+    fs.open("credential.dat", std::ios::out | std::ios::binary);
+
+    cereal::BinaryOutputArchive oar(fs);
+    oar(owner);
+
+    fs.close();
+    encrypt("credential.dat");
+}
 
 class pengguna{
 public:
@@ -339,7 +364,8 @@ public:
         cout << "3. list mobil yang tersedia\n";
         cout << "4. list mobil yang dipilih\n";
         cout << "5. check out\n";
-        cout << "6. keluar\n";
+        cout << "6. reset pendapatan\n";
+        cout << "7. keluar\n";
         cout << "===============================\n";
         cout << "Pilih menu : ";
     }
@@ -357,7 +383,7 @@ public:
             cout << "masukkan plat mobil yang ingin ditambahkan!\n";
             cout << "plat : ";
             cin >> plat;
-            
+
             try{
                 cereal::BinaryInputArchive oarc(fs2);
                 oarc(car);
@@ -574,7 +600,8 @@ void runtimePemilik(){
             case 3 : displayMobil(); break;
             case 4 : owner.ttlPendapatan(); break;
             case 5 : changeCredential(); break;
-            case 6 : exit(1);
+            case 6 : resetPendapatan(); break;
+            case 7 : exit(1);
             default : cout << "\npilihan salah !!"; Sleep(2000);
         }
     }
