@@ -198,9 +198,8 @@ public:
         cout << "2. hapus mobil\n";
         cout << "3. tampilkan mobil\n";
         cout << "4. tampilkan pendapatan\n";
-        cout << "5. ubah username\n";
-        cout << "6. ubah password\n";
-        cout << "7. keluar\n";
+        cout << "5. ubah username/password\n";
+        cout << "6. keluar\n";
         cout << "================\n";
         cout << "pilih menu : ";
     }
@@ -287,6 +286,43 @@ private:
 };
 
 pemilik owner;
+
+void changeCredential(){
+        string temp;
+        system("CLS");
+        decrypt("credential.dat");
+
+        fs.open("credential.dat", std::ios::out | std::ios::binary);
+        cout << "masukkan username : ";
+        cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        getline(std::cin, temp);
+        owner.setUsername(temp);
+
+        cout << "masukkan password : ";
+        temp = hiddenChar();
+        owner.setPassword(temp);
+
+        {
+            cereal::BinaryOutputArchive oar(fs);
+            oar(owner);
+        }
+        fs.close();
+
+        owner.setUsername("");
+        owner.setPassword("");
+
+        fs.open("credential.dat", std::ios::in | std::ios::binary);
+        {
+            cereal::BinaryInputArchive iar(fs);
+            iar(owner);
+        }
+        fs.close();
+
+        std::cout << "\nusername adalah = " << owner.getUsername();
+        std::cout << "\npassword adalah = " << owner.getPassword();
+        
+        encrypt("credential.dat");   
+    }
 
 class pengguna{
 public:
@@ -515,7 +551,8 @@ void runtimePemilik(){
             case 2 : owner.hapusMobil(); break;
             case 3 : displayMobil(); break;
             case 4 : owner.pendapatan(); break;
-            case 5 : exit(1);
+            case 5 : changeCredential(); break;
+            case 6 : exit(1);
             default : cout << "\npilihan salah !!"; Sleep(2000);
         }
     }
@@ -600,6 +637,8 @@ int main(){
 
     // std::cout << "\nusername adalah = " << owner.getUsername();
     // std::cout << "\npassword adalah = " << owner.getPassword();
+
+    // encrypt("credential.dat");
 
     return 0;
 }
