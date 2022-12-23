@@ -118,8 +118,8 @@ public:
         cout << "model\t\t: " << model << "\n";
         cout << "plat nomor\t: " << platNomor << "\n";
         cout << "harga sewa\t: " << std::showbase << std::put_money(hargaSewa) << "\n";
-        cout << "jumlah hari sewa:" << hariSewa << "\n";
-        cout << "harga sewa total:" << std::showbase << std::put_money(hargaSewa*hariSewa) << "\n";
+        cout << "jumlah hari sewa: " << hariSewa << "\n";
+        cout << "harga sewa total: " << std::showbase << std::put_money(hargaSewa*hariSewa) << "\n";
     }
     string getPlat(){
         return platNomor;
@@ -130,7 +130,9 @@ public:
     int getHariSewa(){
         return hariSewa;
     }
-
+    int getHargaSewa(){
+        return hargaSewa;
+    }
 private:
     friend class cereal::access;
 
@@ -344,7 +346,43 @@ public:
     }
 
     void delMobil(){
-        
+        string nomorMobil;
+        system("CLS");
+
+        cout << "masukkan plat mobil yang ingin dihapus : ";
+        cin >> nomorMobil;
+
+        fs.open("cart.dat", std::ios::in | std::ios::out | std::ios::binary);
+
+        std::fstream fs2;
+        fs2.open("temp.dat", std::ios::out | std::ios::binary);
+
+        fs.seekg(0, ios::beg);
+
+        while(true){
+            try{
+                cereal::BinaryInputArchive input(fs);
+                input(car);
+            }
+            catch (cereal::Exception &e){
+                break;
+            }
+
+            if(car.getPlat() != nomorMobil){
+                cereal::BinaryOutputArchive output_archive(fs2);
+                output_archive(car);
+            }
+        }
+            
+        fs2.close();
+        fs.close();
+
+        remove("cart.dat");
+        rename("temp.dat", "cart.dat");
+
+        cout << "mobil dihapus";
+        pause();
+    
     }
 
     void tampilCart(){
@@ -364,6 +402,7 @@ public:
                 {
                     input(car);
                     car.tampilkanCart();
+                    total += (car.getHariSewa()*car.getHargaSewa());
                 }
                 catch (cereal::Exception &e)
                 {
@@ -371,13 +410,27 @@ public:
                 }
             }
             fs.close();
-            pause();
         }
     }
 
     void checkout(){
+        int pilihan;
+        total = 0;
 
+        tampilCart();
+        cout << "\n\nharga yang harus dibayar adalah : "<< std::showbase << std::put_money(total) << "\n";
+        cout << "\n\n1.bayar";
+        cout << "\n2.kembali";
+        cout << "\npilihan : ";
+        cin >> pilihan;
+        if(pilihan == 1){
+            remove("cart.dat");
+            cout << "\npembayaran berhasil!";
+            pause();
+        }
     }
+private:
+    int total;
 };
 
 pengguna user;
@@ -479,7 +532,7 @@ void runtimePengguna(){
             case 1 : user.addMobil(); break;
             case 2 : user.delMobil(); break;
             case 3 : displayMobil(); break;
-            case 4 : user.tampilCart(); break;
+            case 4 : user.tampilCart(); pause(); break;
             case 5 : user.checkout(); break;
             case 6 : exit(1);
             default : cout << "\npilihan salah !!"; Sleep(2000);
