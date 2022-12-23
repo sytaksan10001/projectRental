@@ -191,6 +191,9 @@ public:
     string getPassword(){
         return password;
     }
+    void pemasukan(int pemasukan){
+        pendapatan += pemasukan;
+    }
 
     void menu(){
         cout << "======MENU======\n";
@@ -269,8 +272,10 @@ public:
         pause();
     }
 
-    void pendapatan(){
-
+    void ttlPendapatan(){
+        system("CLS");
+        cout << "pendapatan owner adalah : " << std::showbase << std::put_money(pendapatan) << "\n";
+        pause();
     }
 
 private:
@@ -278,11 +283,12 @@ private:
 
     template<class Archive>
     void serialize(Archive &ar) {
-        ar(username, password);
+        ar(username, password, pendapatan);
     }
 
     string username;
     string password;
+    int pendapatan;
 };
 
 pemilik owner;
@@ -346,12 +352,12 @@ public:
         std::ofstream fs("cart.dat", std::ios::app | std::ios::binary);
         std::ifstream fs2("mobil.dat", std::ios::in | std::ios::binary);
 
-        system("CLS");
-        cout << "masukkan plat mobil yang ingin ditambahkan!\n";
-        cout << "plat : ";
-        cin >> plat;
-
         do{
+            system("CLS");
+            cout << "masukkan plat mobil yang ingin ditambahkan!\n";
+            cout << "plat : ";
+            cin >> plat;
+            
             try{
                 cereal::BinaryInputArchive oarc(fs2);
                 oarc(car);
@@ -457,11 +463,27 @@ public:
         cout << "\n\nharga yang harus dibayar adalah : "<< std::showbase << std::put_money(total) << "\n";
         cout << "\n\n1.bayar";
         cout << "\n2.kembali";
-        cout << "\npilihan : ";
+        cout << "\n\npilihan : ";
         cin >> pilihan;
         if(pilihan == 1){
             remove("cart.dat");
+            decrypt("credential.dat");
+
+            std::ifstream fs2("credential.dat", ios::in | std::ios::binary);
+            cereal::BinaryInputArchive input(fs2);
+            
+            input(owner);
+            owner.pemasukan(total);
+            fs2.close();
+
+            fs.open("credential.dat", std::ios::out | std::ios::binary);
+
+            cereal::BinaryOutputArchive oar(fs);
+            oar(owner);
+            fs.close();
+
             cout << "\npembayaran berhasil!";
+            encrypt("credential.dat");   
             pause();
         }
     }
@@ -550,7 +572,7 @@ void runtimePemilik(){
             case 1 : owner.saveMobil(); break;
             case 2 : owner.hapusMobil(); break;
             case 3 : displayMobil(); break;
-            case 4 : owner.pendapatan(); break;
+            case 4 : owner.ttlPendapatan(); break;
             case 5 : changeCredential(); break;
             case 6 : exit(1);
             default : cout << "\npilihan salah !!"; Sleep(2000);
