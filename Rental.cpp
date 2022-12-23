@@ -164,7 +164,6 @@ bool cariMobil(string plat){
             catch (cereal::Exception &e){
                 fs.close();
                 return false;
-                // break;
             }
 
             if(car.getPlat() == plat){
@@ -247,6 +246,11 @@ public:
         cin >> nomorMobil;
 
         fs.open("mobil.dat", std::ios::in | std::ios::out | std::ios::binary);
+        if(!fs.is_open()){
+            cout << "\ntidak ada file yang dapat di hapus!";
+            pause();
+            return;
+        }
 
         std::fstream fs2;
         fs2.open("temp.dat", std::ios::out | std::ios::binary);
@@ -373,15 +377,19 @@ public:
         char ch = 'Y';
         string plat;
         int temp;
+        int status = 0;
 
         std::ofstream fs("cart.dat", std::ios::app | std::ios::binary);
         std::ifstream fs2("mobil.dat", std::ios::in | std::ios::binary);
 
         do{
             system("CLS");
-            cout << "masukkan plat mobil yang ingin ditambahkan!\n";
-            cout << "plat : ";
-            cin >> plat;
+            if(status == 0){
+                cout << "masukkan plat mobil yang ingin ditambahkan!\n";
+                cout << "plat : ";
+                cin >> plat;
+            }
+            status++;
 
             try{
                 cereal::BinaryInputArchive oarc(fs2);
@@ -400,6 +408,7 @@ public:
                     cout << "\nmobil berhasil ditambahkan ke keranjang!";
                     cout << "\ntambahkan mobil lainnya?..(y/n?)";
                     cin >> ch;
+                    status = 0;
                 }
             }
             catch (cereal::Exception &e){
@@ -420,6 +429,11 @@ public:
         cin >> nomorMobil;
 
         fs.open("cart.dat", std::ios::in | std::ios::out | std::ios::binary);
+        if(!fs.is_open()){
+            cout << "\ntidak ada mobil yang dapat dihapus!";
+            pause();
+            return;
+        }
 
         std::fstream fs2;
         fs2.open("temp.dat", std::ios::out | std::ios::binary);
@@ -457,27 +471,40 @@ public:
         std::ifstream fs("cart.dat", std::ios::binary);
         cereal::BinaryInputArchive input(fs);
 
-        if(!fs.is_open()){
-            cout << "tidak dapat membuka file!";
-            pause();
-            return;
 
-        }else{
-            while(true)
-            {
-                try
-                {
-                    input(car);
-                    car.tampilkanCart();
-                    total += (car.getHariSewa()*car.getHargaSewa());
-                }
-                catch (cereal::Exception &e)
-                {
-                    break;
-                }
+        while(true){
+            try{
+                input(car);
+                car.tampilkanCart();
+                total += (car.getHariSewa()*car.getHargaSewa());
             }
-            fs.close();
+            catch (cereal::Exception &e){
+                break;
+            }
         }
+        fs.close();
+
+        // if(!fs.is_open()){
+        //     cout << "tidak dapat membuka file!";
+        //     pause();
+        //     return;
+
+        // }else{
+        //     while(true)
+        //     {
+        //         try
+        //         {
+        //             input(car);
+        //             car.tampilkanCart();
+        //             total += (car.getHariSewa()*car.getHargaSewa());
+        //         }
+        //         catch (cereal::Exception &e)
+        //         {
+        //             break;
+        //         }
+        //     }
+        //     fs.close();
+        // }
     }
 
     void checkout(){
@@ -601,7 +628,7 @@ void runtimePemilik(){
             case 5 : changeCredential(); break;
             case 6 : resetPendapatan(); break;
             case 7 : exit(1);
-            default : cout << "\npilihan salah !!"; Sleep(2000);
+            default : cout << "\npilihan salah !!"; Sleep(2000); break;
         }
     }
 }
@@ -620,7 +647,7 @@ void runtimePengguna(){
             case 4 : user.tampilCart(); pause(); break;
             case 5 : user.checkout(); break;
             case 6 : exit(1);
-            default : cout << "\npilihan salah !!"; Sleep(2000);
+            default : cout << "\npilihan salah !!"; Sleep(2000); break;
         }
     }
 }
