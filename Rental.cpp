@@ -201,7 +201,7 @@ public:
     }
 
     void menu(){
-        cout << "======MENU======\n";
+        cout << "==========MENU==========\n";
         cout << "1. input mobil\n";
         cout << "2. hapus mobil\n";
         cout << "3. tampilkan mobil\n";
@@ -209,7 +209,7 @@ public:
         cout << "5. ubah username/password\n";
         cout << "6. reset pendapatan\n";
         cout << "7. keluar\n";
-        cout << "================\n";
+        cout << "========================\n";
         cout << "pilih menu : ";
     }
 
@@ -364,9 +364,8 @@ public:
         cout << "3. list mobil yang tersedia\n";
         cout << "4. list mobil yang dipilih\n";
         cout << "5. check out\n";
-        cout << "6. reset pendapatan\n";
-        cout << "7. keluar\n";
-        cout << "===============================\n";
+        cout << "6. keluar\n";
+        cout << "==============================\n";
         cout << "Pilih menu : ";
     }
 
